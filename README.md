@@ -1,24 +1,33 @@
-# 🚀 Lab DevOps: Observabilidade & Automação de Infraestrutura
+# 🚀 Lab DevOps: Observabilidade, IaC & Automação GCP
 
-Este repositório contém o laboratório prático focado em observabilidade, 
-automação de scripts de diagnósticos de sistemas e provisionamento de infraestrutura (IaC).
+Este repositório contém a solução completa de um laboratório prático focado em observabilidade, automação de diagnósticos de sistemas, conteinerização e provisionamento de infraestrutura como código (IaC) integrada ao Google Cloud Platform (GCP).
 
 ---
 
-## 📌 O que foi feito nesta fase
+## 📌 O que foi feito neste projeto
 
-### 3. 🖥️ Infraestrutura Virtualizada com Vagrant
-* Automação do provisionamento de VM Linux via `Vagrantfile`.
-* Criação de ambiente isolado para execução de stacks de monitoramento.
+### 1. 🐍 Script de Diagnóstico e Automação (Python)
+* Desenvolvido script Python (`check_sistema.py`) para coleta de métricas em tempo real (CPU, RAM, Disco e Rede).
+* Exportação de dados estruturados em JSON e envio de notificações para Webhook do Microsoft Teams.
+* Integração nativa com **Google Cloud Storage (GCS)** para armazenamento seguro de relatórios.
 
-### 4. 📊 Observabilidade Centralizada (Prometheus & Grafana)
-* Orquestração de contêineres utilizando **Docker Compose**.
-* Coleta de métricas do sistema operacional com **Node Exporter**.
-* Dashboard no Grafana para monitoramento em tempo real de uso de CPU, RAM e I/O de disco.
+### 2. 🐳 Conteinerização & Execução Local (Docker)
+* Empacotamento do serviço em imagem Linux otimizada via `Dockerfile`.
+* Orquestração com **Docker Compose** mapeando credenciais locais do GCP (`gcloud`) e diretórios de logs do host.
 
-### 5. 🐙 Controle de Versão e CI/CD
-* Inicialização e estruturação do repositório Git com `.gitignore` para ambientes virtuais (`.vagrant/`).
-* Publicação do código no GitHub com boas práticas de commits.
+### 3. 🏗️ Infraestrutura como Código (Terraform)
+* Declaração de recursos no GCP (Buckets GCS) utilizando arquivos do **Terraform** (`main.tf`, `variables.tf`, `outputs.tf`).
+* Configuração do **Application Default Credentials (ADC)** para autenticação segura em ambiente de desenvolvimento.
+
+### 4. 🔄 Pipeline de CI/CD (GitHub Actions)
+* Esteira automatizada no GitHub Actions disparada a cada `push` ou `pull_request` na branch `main`.
+* **Validações de IaC:** Formatação automática (`terraform fmt -check`) e validação de sintaxe (`terraform validate`).
+* Execução e validação automatizada das rotinas do script Python.
+
+### 5. 🖥️ Observabilidade & Ambiente Virtualizado (Vagrant, Prometheus & Grafana)
+* Provisionamento de VM Linux via `Vagrantfile`.
+* Coleta de métricas do SO com **Node Exporter**.
+* Visualização em tempo real do uso de CPU, RAM e I/O de disco através do **Grafana** e **Prometheus**.
 
 ---
 
@@ -26,31 +35,41 @@ automação de scripts de diagnósticos de sistemas e provisionamento de infraes
 
 | Categoria | Tecnologias |
 | :--- | :--- |
-| **Linguagem & Scripts** | Python 3.11, Bash, Batch Script (`.bat`) |
+| **Linguagens & Scripts** | Python 3.11, Bash |
+| **Cloud Provider** | Google Cloud Platform (GCS, gcloud CLI) |
+| **Infraestrutura como Código** | Terraform, Vagrant, VirtualBox |
 | **Conteinerização** | Docker, Docker Compose |
-| **Infraestrutura como Código** | Vagrant, VirtualBox |
 | **Observabilidade** | Prometheus, Grafana, Node Exporter |
-| **Versionamento** | Git, GitHub |
+| **CI/CD & Versionamento** | Git, GitHub, GitHub Actions |
 
 ---
 
 ## 🚀 Como Executar o Projeto Localmente
 
 ### 1. Clonar o repositório
-bash
+```bash
 git clone [https://github.com/callermaia/lab-devops-iac.git](https://github.com/callermaia/lab-devops-iac.git)
 cd lab-devops-iac
 
-2. Executar o script de verificação nativo (Windows)
-Bash
-python check_sistema.py
+2. Executar a aplicação via Docker Compose
+Certifique-se de que autenticou no GCP previamente com gcloud auth application-default login:
 
-3. Subir a VM de observabilidade com Vagrant 
+Bash
+docker compose up --build
+
+3. Validar a Infraestrutura com Terraform
+Bash
+cd terraform
+terraform init
+terraform plan
+
+4. Subir a stack de Observabilidade (Vagrant)
 Bash
 vagrant up
 vagrant ssh
-
 📝 Lições Aprendidas
-Isolamento de Kernel: Containers rodando sob o WSL2 reportam o uso de memória e CPU do kernel da máquina virtual Linux, e não do Host Windows.
+Autenticação em Contêineres: Uso do Application Default Credentials (ADC) mapeando o volume do .config/gcloud local para dentro do contêiner Docker em modo leitura (:ro).
 
-Coleta Direta: Para monitorar o Host Windows com precisão absoluta, o script deve rodar nativamente na máquina física ou expor métricas via agentes de rede.
+Isolamento de Kernel: Contêineres rodando sob o WSL2 reportam o uso de recursos do kernel Linux virtualizado, exigindo mapeamento correto para leitura de dados do host.
+
+Segurança no Git: Ignorar pastas pesadas e binários (como .terraform/ e .vagrant/) no .gitignore evita estouro do limite do GitHub e contaminação do histórico.
